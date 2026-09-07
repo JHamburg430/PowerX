@@ -1,5 +1,9 @@
 # APK analysis runbook
 
+> Status: the APK was acquired and analyzed. See
+> [Local recovery](local-recovery.md) for recovered protocol details and the
+> emulator-verified patch.
+
 ## 1. Preserve the original
 
 Copy the APK from a device backup or a reputable archive into `input/`. Do not
@@ -73,4 +77,3 @@ Before calling a recovery successful, verify:
 6. no request is made to an unverified third-party endpoint;
 7. the rebuilt APK is signed with a project-owned development key and is clearly
    labeled as an unofficial preservation build.
-

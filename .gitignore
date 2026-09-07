@@ -15,4 +15,8 @@ work/*
 *.keystore
 .env
 local.properties
-
+.tools/
+signing/
+output/
+__pycache__/
+*.pyc

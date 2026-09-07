@@ -64,6 +64,23 @@ python3 server/powerx_local.py \
 The service accepts any syntactically valid email/password pair and does not
 store or log the submitted password. Keep it on a trusted LAN.
 
+## Install or update with Obtainium
+
+Add this repository URL to Obtainium:
+
+```text
+https://github.com/JHamburg430/PowerX
+```
+
+Choose the GitHub source if Obtainium does not detect it automatically. Release
+assets whose names end in `.apk` are installable builds. This local series uses
+the same owner-controlled signing key for upgrades; do not delete the gateway's
+ignored `signing/` directory if future in-place updates are required.
+
+The current release is configured specifically for the compatibility service at
+`192.168.0.250:8080`. It will not work away from that LAN unless rebuilt for a
+different equal-length discovery URL.
+
 ## Rebuild the patched APK
 
 With the original verified APK and local Apktool already present on the gateway:

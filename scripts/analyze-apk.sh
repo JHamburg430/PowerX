@@ -32,7 +32,7 @@ report="$output_dir/report.txt"
 
 aapt_path=$(command -v aapt || true)
 if [[ -z "$aapt_path" ]]; then
-  aapt_path=$(rg --files /home/john/.android-build/android-sdk/build-tools 2>/dev/null | grep '/aapt$' | sort -V | tail -1 || true)
+  aapt_path=$(rg --files /home/john/.android-build/android-sdk/build-tools 2>/dev/null | rg '/aapt$' | sort -V | tail -1 || true)
 fi
 
 if [[ -n "$aapt_path" ]]; then
@@ -53,7 +53,7 @@ fi
   echo "Embedded network indicators"
   unzip -p "$apk_path" 2>/dev/null \
     | strings \
-    | grep -Eio '((https?|wss?|mqtt)://[^[:space:]"<>]+|([[:alnum:]_-]+\.)+(powerx\.co|amazonaws\.com|amazoncognito\.com|appsync-api\.[[:alnum:].-]+|execute-api\.[[:alnum:].-]+))' \
+    | rg -io '((https?|wss?|mqtt)://[^[:space:]"<>]+|([[:alnum:]_-]+\.)+(powerx\.co|amazonaws\.com|amazoncognito\.com|appsync-api\.[[:alnum:].-]+|execute-api\.[[:alnum:].-]+))' \
     | sed 's/[),;]*$//' \
     | sort -u \
     || true

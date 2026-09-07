@@ -1,0 +1,18 @@
+# Original application packages are user-supplied and are not redistributed.
+input/*.apk
+input/*.apks
+input/*.xapk
+input/*.aab
+
+# Generated reverse-engineering output.
+artifacts/*
+!artifacts/.gitkeep
+work/*
+!work/.gitkeep
+
+# Signing material and local configuration.
+*.jks
+*.keystore
+.env
+local.properties
+

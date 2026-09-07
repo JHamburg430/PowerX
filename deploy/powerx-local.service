@@ -1,0 +1,16 @@
+[Unit]
+Description=PowerX Local compatibility service
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/john/.openclaw/workspaces/main/PowerX
+ExecStart=/usr/bin/python3 /home/john/.openclaw/workspaces/main/PowerX/server/powerx_local.py --bind 0.0.0.0 --port 8080 --advertise-url http://192.168.0.250:8080
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

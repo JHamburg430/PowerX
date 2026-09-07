@@ -64,6 +64,15 @@ python3 server/powerx_local.py \
 The service accepts any syntactically valid email/password pair and does not
 store or log the submitted password. Keep it on a trusted LAN.
 
+On the gateway, the service is installed as the enabled systemd user unit
+`powerx-local.service`, so it starts with the user session and automatically
+restarts after failures. Useful checks are:
+
+```bash
+systemctl --user status powerx-local.service
+journalctl --user -u powerx-local.service -f
+```
+
 ## Install or update with Obtainium
 
 Add this repository URL to Obtainium:

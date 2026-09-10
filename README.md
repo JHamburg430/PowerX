@@ -51,14 +51,14 @@ See [Research](docs/research.md) and the [APK analysis runbook](docs/apk-analysi
 
 ## Run the local compatibility service
 
-The checked-in defaults match this gateway's current LAN address
-(`192.168.0.250`). Start the service before opening the patched app:
+The checked-in defaults use this gateway's private Tailscale address
+(`100.76.133.101`). Start the service before opening the patched app:
 
 ```bash
 python3 server/powerx_local.py \
   --bind 0.0.0.0 \
   --port 8080 \
-  --advertise-url http://192.168.0.250:8080
+  --advertise-url http://100.76.133.101:8080
 ```
 
 The service accepts any syntactically valid email/password pair and does not
@@ -86,9 +86,10 @@ assets whose names end in `.apk` are installable builds. This local series uses
 the same owner-controlled signing key for upgrades; do not delete the gateway's
 ignored `signing/` directory if future in-place updates are required.
 
-The current release is configured specifically for the compatibility service at
-`192.168.0.250:8080`. It will not work away from that LAN unless rebuilt for a
-different equal-length discovery URL.
+Release `v2.6.17-local.2` is configured specifically for the compatibility service at
+`100.76.133.101:8080`. The Android device must be signed into John's Tailscale
+tailnet, but it can then use PowerX from any internet connection. This endpoint
+is not exposed to the public internet.
 
 ## Rebuild the patched APK
 
@@ -98,7 +99,7 @@ With the original verified APK and local Apktool already present on the gateway:
 ./scripts/build-local-apk.sh
 ```
 
-The output is `output/PowerX-Local-2.6.17.apk`. Because it has an owner-controlled
+The output is `output/PowerX-Tailscale-2.6.17-local.2.apk`. Because it has an owner-controlled
 signature instead of PowerX/Google Play's signature, Android requires the old
 PowerX Terra app to be uninstalled before this build can be installed. Preserve
 any app-local data first.

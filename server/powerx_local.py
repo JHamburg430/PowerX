@@ -146,7 +146,7 @@ def parse_args():
     parser.add_argument("--port", type=int, default=8080)
     parser.add_argument(
         "--advertise-url",
-        default="http://192.168.0.250:8080",
+        default="http://100.76.133.101:8080",
         help="URL reachable by the Android device (without the /api suffix)",
     )
     return parser.parse_args()

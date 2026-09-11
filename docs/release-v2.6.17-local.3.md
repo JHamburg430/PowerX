@@ -23,3 +23,12 @@ APK SHA-256:
 ```text
 d58669a5abcefd4d5824bb955b2841c439d2d8712de59bd544ceb3eea4044ab3
 ```
+
+## Server-side loading correction
+
+The initial release server fabricated a connected hub so the app would enter
+Dashboard. Because no physical hub or telemetry stream was available, the
+Dashboard loaders could not complete. The compatibility service now returns an
+empty hub list and no selected/current hub until hardware discovery succeeds.
+The recovered splash state machine treats that as **Setup Hub**. This correction
+does not change the APK and therefore does not require a new Obtainium build.

@@ -60,8 +60,14 @@ class LocalServerTests(unittest.TestCase):
         started = time.monotonic()
         hubs = self.request_json("/api/v6/hubs")["data"]
         elapsed = time.monotonic() - started
-        self.assertEqual(hubs[0]["id"], "e1a687")
+        self.assertEqual(hubs, [])
         self.assertGreaterEqual(elapsed, 0.20)
+
+    def test_no_current_hub_before_physical_discovery(self):
+        customer = self.request_json("/api/v6/customers")["data"]
+        current = self.request_json("/api/v6/hubs/current")["data"]
+        self.assertIsNone(customer["selected_hub_id"])
+        self.assertIsNone(current)
 
     def test_identify_hub(self):
         device = self.request_json("/api/v6/devices/identify/e1a687")["data"]

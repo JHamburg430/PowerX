@@ -120,7 +120,11 @@ class PowerXHandler(BaseHTTPRequestHandler):
                         "id": 1,
                         "full_name": "PowerX Local Owner",
                         "email": "owner@powerx.local",
-                        "selected_hub_id": LOCAL_HUB_ID,
+                        # Do not claim a selected hub until the physical hub is
+                        # actually reachable. A synthetic selection sends the
+                        # app into Dashboard, whose telemetry loaders never
+                        # complete for a nonexistent local hub.
+                        "selected_hub_id": None,
                         "preferences": {
                             "currency": "usd",
                             "volume_unit": "gallons",
@@ -134,7 +138,7 @@ class PowerXHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/v6/hubs/current" and method == "GET":
-            self._send_json(envelope(local_hub()))
+            self._send_json(envelope(None, "No reachable local hub yet"))
             return
 
         if path == "/api/v6/hubs" and method == "GET":
@@ -144,7 +148,10 @@ class PowerXHandler(BaseHTTPRequestHandler):
             # and leave the splash screen spinning forever. Keep this single
             # response asynchronous from the app's point of view.
             time.sleep(HUB_LIST_COMPAT_DELAY_SECONDS)
-            self._send_json(envelope([local_hub()]))
+            # An empty list is meaningful to Terra: the splash listener opens
+            # Setup Hub. Returning a fabricated connected hub instead routes
+            # into Dashboard and leaves its telemetry loading indefinitely.
+            self._send_json(envelope([]))
             return
 
         if path == "/api/v6/hubs" and method == "POST":

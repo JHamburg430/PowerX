@@ -95,6 +95,12 @@ This release accompanies compatibility-service fixes for the app's startup
 loading race and the local hub identification, registration, firmware-check,
 current-hub, and hub-list responses.
 
+The compatibility service reports no selected/current hub until a physical hub
+is actually reachable. This keeps a signed-in installation on **Setup Hub**
+instead of routing it into a dashboard that waits forever for nonexistent
+telemetry. This behavior is server-side and does not require another APK after
+`v2.6.17-local.3`.
+
 ## Rebuild the patched APK
 
 With the original verified APK and local Apktool already present on the gateway:

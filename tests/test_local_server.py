@@ -1,5 +1,6 @@
 import json
 import threading
+import time
 import unittest
 from http.server import ThreadingHTTPServer
 from urllib.request import Request, urlopen
@@ -55,8 +56,32 @@ class LocalServerTests(unittest.TestCase):
         self.assertEqual(response["code"], "success")
         self.assertEqual(response["data"]["access_token"], "powerx-local-access")
 
-    def test_empty_hub_list(self):
-        self.assertEqual(self.request_json("/api/v6/hubs")["data"], [])
+    def test_local_hub_list(self):
+        started = time.monotonic()
+        hubs = self.request_json("/api/v6/hubs")["data"]
+        elapsed = time.monotonic() - started
+        self.assertEqual(hubs[0]["id"], "e1a687")
+        self.assertGreaterEqual(elapsed, 0.20)
+
+    def test_identify_hub(self):
+        device = self.request_json("/api/v6/devices/identify/e1a687")["data"]
+        self.assertEqual(device["device_type"], "hub")
+
+    def test_register_and_poll_hub(self):
+        registered = self.request_json(
+            "/api/v6/hubs", method="POST", data={"hub_id": "e1a687"}
+        )
+        self.assertEqual(registered["code"], "success")
+        self.assertEqual(registered["data"]["id"], "e1a687")
+        hub = self.request_json("/api/v6/hubs/e1a687")["data"]
+        self.assertEqual(hub["connection_status"], "connected")
+
+    def test_hub_firmware_is_current(self):
+        response = self.request_json(
+            "/api/v5/firmware/hubs/e1a687/ota/check"
+        )
+        self.assertEqual(response["code"], "success")
+        self.assertFalse(response["data"]["hub-ota-required"])
 
 
 if __name__ == "__main__":

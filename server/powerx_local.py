@@ -6,12 +6,30 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import time
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
 
 LOG = logging.getLogger("powerx-local")
+
+LOCAL_HUB_ID = "e1a687"
+HUB_LIST_COMPAT_DELAY_SECONDS = 0.25
+
+
+def local_hub(hub_id=LOCAL_HUB_ID):
+    """Return the smallest HubInformationResponse accepted by the Terra app."""
+    return {
+        "id": hub_id,
+        "qr_code": hub_id,
+        "hub_name": "Home",
+        "connection_status": "connected",
+        "powerx_status": "online",
+        "devices": [],
+        "connected_users": 1,
+        "shared": False,
+    }
 
 
 def envelope(data=None, message="Local compatibility service"):
@@ -102,7 +120,7 @@ class PowerXHandler(BaseHTTPRequestHandler):
                         "id": 1,
                         "full_name": "PowerX Local Owner",
                         "email": "owner@powerx.local",
-                        "selected_hub_id": None,
+                        "selected_hub_id": LOCAL_HUB_ID,
                         "preferences": {
                             "currency": "usd",
                             "volume_unit": "gallons",
@@ -116,11 +134,52 @@ class PowerXHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/v6/hubs/current" and method == "GET":
-            self._send_json(envelope(None, "No local hub has been imported yet"))
+            self._send_json(envelope(local_hub()))
             return
 
         if path == "/api/v6/hubs" and method == "GET":
-            self._send_json(envelope([]))
+            # Terra dispatches FetchHubList from initState before its
+            # BlocListener is mounted. The original cloud was slow enough that
+            # this race stayed hidden; a loopback response can complete first
+            # and leave the splash screen spinning forever. Keep this single
+            # response asynchronous from the app's point of view.
+            time.sleep(HUB_LIST_COMPAT_DELAY_SECONDS)
+            self._send_json(envelope([local_hub()]))
+            return
+
+        if path == "/api/v6/hubs" and method == "POST":
+            # Return the registered hub as well as accepting the operation. Some
+            # app screens only inspect the status, while later ones retain data
+            # from this response during the firmware-check handoff.
+            self._send_json(envelope(local_hub(), "Hub registered locally"))
+            return
+
+        firmware_prefix = "/api/v5/firmware/hubs/"
+        firmware_suffix = "/ota/check"
+        if (
+            path.startswith(firmware_prefix)
+            and path.endswith(firmware_suffix)
+            and method == "GET"
+        ):
+            # The discontinued cloud used this flag to decide whether to open
+            # the OTA workflow. False means the installed hub is current.
+            self._send_json(envelope({"hub-ota-required": False}))
+            return
+
+        identify_prefix = "/api/v6/devices/identify/"
+        if path.startswith(identify_prefix) and method == "GET":
+            hub_id = path[len(identify_prefix):] or LOCAL_HUB_ID
+            self._send_json(
+                envelope(
+                    {"qr_code": hub_id, "id": hub_id, "device_type": "hub"}
+                )
+            )
+            return
+
+        hub_prefix = "/api/v6/hubs/"
+        if path.startswith(hub_prefix) and method == "GET":
+            hub_id = path[len(hub_prefix):] or LOCAL_HUB_ID
+            self._send_json(envelope(local_hub(hub_id)))
             return
 
         if path in ("/api/v6/sensors", "/api/v4/notifications") and method == "GET":

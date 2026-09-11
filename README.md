@@ -86,10 +86,14 @@ assets whose names end in `.apk` are installable builds. This local series uses
 the same owner-controlled signing key for upgrades; do not delete the gateway's
 ignored `signing/` directory if future in-place updates are required.
 
-Release `v2.6.17-local.2` is configured specifically for the compatibility service at
+Release `v2.6.17-local.3` is configured specifically for the compatibility service at
 `100.76.133.101:8080`. The Android device must be signed into John's Tailscale
 tailnet, but it can then use PowerX from any internet connection. This endpoint
 is not exposed to the public internet.
+
+This release accompanies compatibility-service fixes for the app's startup
+loading race and the local hub identification, registration, firmware-check,
+current-hub, and hub-list responses.
 
 ## Rebuild the patched APK
 
@@ -99,7 +103,7 @@ With the original verified APK and local Apktool already present on the gateway:
 ./scripts/build-local-apk.sh
 ```
 
-The output is `output/PowerX-Tailscale-2.6.17-local.2.apk`. Because it has an owner-controlled
+The output is `output/PowerX-Tailscale-2.6.17-local.3.apk`. Because it has an owner-controlled
 signature instead of PowerX/Google Play's signature, Android requires the old
 PowerX Terra app to be uninstalled before this build can be installed. Preserve
 any app-local data first.

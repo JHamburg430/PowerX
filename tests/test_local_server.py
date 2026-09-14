@@ -79,10 +79,16 @@ class LocalServerTests(unittest.TestCase):
         )
         self.assertEqual(registered["code"], "success")
         self.assertEqual(registered["data"]["id"], "e1a687")
-        hub = self.request_json("/api/v6/hubs/e1a687")["data"]
-        self.assertEqual(hub["connection_status"], "connected")
+        polled = self.request_json("/api/v6/hubs/e1a687")
+        self.assertNotEqual(polled["code"], "success")
+        hub = polled["data"]
+        self.assertEqual(hub["connection_status"], "disconnected")
+        # Original HubInformationResponse parser casts powerx_status to bool?.
+        # The previous string "online" threw before BaseResponse.isOk ran.
+        for value in (registered["data"]["powerx_status"], hub["powerx_status"]):
+            self.assertTrue(value is None or type(value) is bool)
 
-    def test_hub_firmware_is_current(self):
+    def test_cloud_firmware_update_is_disabled(self):
         response = self.request_json(
             "/api/v5/firmware/hubs/e1a687/ota/check"
         )

@@ -19,15 +19,17 @@ HUB_LIST_COMPAT_DELAY_SECONDS = 0.25
 
 
 def local_hub(hub_id=LOCAL_HUB_ID):
-    """Return the smallest HubInformationResponse accepted by the Terra app."""
+    """Return a schema-compatible placeholder, not evidence of hub connectivity."""
     return {
         "id": hub_id,
         "qr_code": hub_id,
         "hub_name": "Home",
-        "connection_status": "connected",
-        "powerx_status": "online",
+        "connection_status": "disconnected",
+        # Original Dart parser at 0x9a567c reads this as bool?, NOT String?.
+        # Keep unknown until the physical device protocol establishes status.
+        "powerx_status": None,
         "devices": [],
-        "connected_users": 1,
+        "connected_users": 0,
         "shared": False,
     }
 
@@ -155,10 +157,13 @@ class PowerXHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/v6/hubs" and method == "POST":
-            # Return the registered hub as well as accepting the operation. Some
-            # app screens only inspect the status, while later ones retain data
-            # from this response during the firmware-check handoff.
-            self._send_json(envelope(local_hub(), "Hub registered locally"))
+            # Acknowledge the app request, not a completed hardware operation.
+            # No registration is persisted yet. The subsequent status poll
+            # must remain non-success until device provisioning is implemented.
+            self._send_json(envelope(
+                local_hub(),
+                "Registration request received; physical provisioning incomplete",
+            ))
             return
 
         firmware_prefix = "/api/v5/firmware/hubs/"
@@ -168,8 +173,8 @@ class PowerXHandler(BaseHTTPRequestHandler):
             and path.endswith(firmware_suffix)
             and method == "GET"
         ):
-            # The discontinued cloud used this flag to decide whether to open
-            # the OTA workflow. False means the installed hub is current.
+            # Disable unavailable cloud OTA. This is NOT a firmware freshness
+            # check and must never trigger a guessed firmware installation.
             self._send_json(envelope({"hub-ota-required": False}))
             return
 
@@ -186,7 +191,13 @@ class PowerXHandler(BaseHTTPRequestHandler):
         hub_prefix = "/api/v6/hubs/"
         if path.startswith(hub_prefix) and method == "GET":
             hub_id = path[len(hub_prefix):] or LOCAL_HUB_ID
-            self._send_json(envelope(local_hub(hub_id)))
+            # ProvisioningBloc treats code=success alone as a connected hub,
+            # regardless of connection_status. Do not fabricate that signal.
+            self._send_json({
+                "code": "pending",
+                "message": "Physical hub certificate provisioning incomplete",
+                "data": local_hub(hub_id),
+            })
             return
 
         if path in ("/api/v6/sensors", "/api/v4/notifications") and method == "GET":

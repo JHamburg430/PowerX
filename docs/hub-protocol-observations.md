@@ -42,3 +42,27 @@ Establish the actual `cert_key` schema and subsequent device connection protocol
 before implementing provisioning. Preserve the original app and hub logic;
 do not treat a synthetic registration success as restored hardware operation.
 Physical registration and readings remain unrecovered.
+
+## Certificate-contract investigation
+
+- A subsequent bounded test observed `User-Agent: ESP32 HTTP Client/1.0`
+  on both discovery and `cert_key` requests. This identifies the HTTP client,
+  not the exact firmware version or board model.
+- Returning HTTP 200 with an empty JSON object at `cert_key` produced no further
+  request to the diagnostic HTTPS listener during the observation window.
+  No key material was sent. This does not establish whether the hub rejected
+  the object, retried elsewhere, or attempted another protocol: the temporary
+  DNS relay had already restored the normal router mapping.
+- TCP connection checks on 22, 23, 80, 443, 1883, 3232, 8080 and 8883 found
+  no reachable listener. This is not an exhaustive port/service inventory.
+- The publicly available `https://api-v2.live.powerx.co/openapi.json` was
+  downloaded and inspected. It contains no `cert_key` or hub certificate
+  contract; no actual device credential endpoint was queried.
+- Targeted public searches and recovered app text did not reveal that contract.
+  A hub firmware image, source, or device-side diagnostic output remains the
+  best evidence for identifying the expected field names and downstream host.
+  Do not infer an MQTT implementation merely from the certificate endpoint name.
+
+Both temporary diagnostic containers were stopped afterward. The LAN HTTPS
+listener was removed; Tailscale listeners remained. Hub ping, PowerX HTTP,
+Internet HTTPS and the unchanged PC default route were checked successfully.

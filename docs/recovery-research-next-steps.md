@@ -108,3 +108,17 @@ firmware has been verified. Do not erase, reflash, or change eFuses to investiga
 
 No public certificate response schema or matching hub firmware image was found.
 Physical registration and readings remain unverified/unrestored.
+
+## Follow-up: BluFi call-site limits
+
+The recovered Dart `blufi_plugin.dart` methods and application call sites expose
+scanning, connection, Wi-Fi scanning, and `configProvision`. The inspected Dart
+assembly does not expose `postCustomData`, `requestDeviceStatus`, or
+`requestDeviceVersion` calls. Those names in Android smali demonstrate native
+library capabilities, not a PowerX-specific diagnostic command or certificate
+parser. No custom command should be inferred from their presence.
+
+A live BLE scan with the PC adapter powered on did not identify the hub by its
+known MAC prefix or PowerX/PHUB/BluFi name. Unnamed advertisements were present;
+this is not proof that BluFi is absent or unsupported. No Bluetooth connection,
+Wi-Fi provisioning command, firmware write, or factory reset was attempted.

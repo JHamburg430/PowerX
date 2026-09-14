@@ -66,3 +66,28 @@ Physical registration and readings remain unrecovered.
 Both temporary diagnostic containers were stopped afterward. The LAN HTTPS
 listener was removed; Tailscale listeners remained. Hub ping, PowerX HTTP,
 Internet HTTPS and the unchanged PC default route were checked successfully.
+
+## Continuous post-certificate observation
+
+A follow-up retained the identity-checked hub-only relay throughout a nominal
+150-second observation (last HTTPS request at 152.9 seconds during cleanup).
+The HTTPS listener and relay ran together; discovery did not terminate capture.
+There were **86 discovery requests and 86 cert_key requests**, each pair using
+TLS 1.2. The certificate endpoint returned HTTP 200 with `{}`, as before.
+
+The hub repeatedly restarted discovery instead of advancing. No other routed
+IPv4 destination was observed by this one-way relay (`forwarded: 0`); discovery
+DNS queries were answered locally. This is bounded evidence, not an exhaustive
+claim about every packet or protocol. It closes the earlier observation gap and
+strongly identifies the empty certificate response as insufficient to progress;
+it does not reveal required fields or prove MQTT usage.
+
+The relay completed normally and sent corrective router ARP mappings. Temporary
+diagnostic containers were stopped. No certificate/key provisioning payload,
+firmware, router configuration, PC route, firewall or forwarding-sysctl changes
+were applied. Local diagnostic TLS keys remained private and were not published.
+The original app and login compatibility service were unchanged.
+
+Next evidence must identify the real certificate contract (firmware/parser,
+redacted historical response, or device-side diagnostics). Repeating empty JSON
+or falsely marking the hub registered is not a recovery implementation.

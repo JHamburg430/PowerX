@@ -91,3 +91,58 @@ The original app and login compatibility service were unchanged.
 Next evidence must identify the real certificate contract (firmware/parser,
 redacted historical response, or device-side diagnostics). Repeating empty JSON
 or falsely marking the hub registered is not a recovery implementation.
+
+## Valid local certificate format experiments — 2026-09-15 UTC
+
+Two bounded runs tested a newly generated RSA-2048 self-signed certificate with
+clientAuth extended usage and its matching PKCS#8 PEM private key. Public-key
+comparison confirmed the pair matches. Key files remain private in ignored
+local diagnostic storage and were not printed or committed.
+
+These were explicitly experimental layouts, not recovered PowerX contracts:
+
+| Response layout | Certificate responses |
+| --- | ---: |
+| cert / key | 14 |
+| certificate / private_key | 14 |
+| certificatePem / keyPair.PrivateKey | 14 |
+| certificatePem / privateKey | 13 |
+| data.cert / data.key | 14 |
+| cert_key.cert / cert_key.key | 15 |
+| certificate / key | 10 |
+| cert / private_key | 10 |
+| cert_pem / key_pem | 11 |
+| client_cert / client_key | 12 |
+| data.certificate / data.key, code=success | 11 |
+| certificatePem / privateKey / ca / url | 11 |
+| Raw PEM certificate followed by key | 11 |
+| Raw PEM key followed by certificate | 13 |
+
+Total: **173 certificate responses**. Every observed sequence returned to
+startup discovery/cert_key; no new HTTPS endpoint or telemetry was observed.
+The relay saw one ICMP packet to the router in the first run and no forwarded
+IPv4 packets in the second. This does not identify the firmware's failure
+branch or establish that manufacturer-signed credentials are necessary.
+
+Limitations: all responses used HTTP 200, Content-Length, Connection: close and
+application/json (including the two raw PEM probes). The tested certificate is
+self-signed, starts at the experiment date, and uses one key encoding. Unknown
+field names, content type, chain requirements, clock validation, additional
+configuration, encoding, or signature checks remain possible. No claim is made
+that these tests exhaust valid local provisioning. Do not repeat them as new
+progress without changing a specific evidence-backed variable.
+
+Both runs retained the hub-only relay through cleanup and sent corrective ARP.
+The active diagnostic container was then stopped. Hub ping passed 2/2; Internet
+HTTPS and PowerX Tailscale health returned HTTP 200. The original PC default
+route remained unchanged and the temporary LAN HTTPS listener was gone.
+Existing passive capture and DNS services were preserved. No router settings,
+PC routes, application code or firmware image were modified. Whether the hub
+persisted any supplied certificate material is not observable from these tests.
+
+A documentation-only request to the documented engineering partner, Very, is
+prepared locally at work/hub-diagnostic/legacy-protocol-request.txt. It asks for
+the response schema, validation requirements, downstream protocol and publicly
+releasable firmware/diagnostics, without private identifiers or credentials.
+No outreach was sent; permission was requested separately. Physical registration
+and real readings remain unresolved.
